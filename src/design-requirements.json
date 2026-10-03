@@ -1,0 +1,354 @@
+{
+    "colors": {
+        "Dark Blue": "#1B2955",
+        "Sky Blue": "#4D93CC",
+        "Green": "#2DB179",
+        "Gold": "#D4B13E",
+        "Black": "#131313",
+        "White": "#FFFFFF"
+    },
+    "header": {
+        "sticky": true,
+        "text": {
+            "0": "Smart Logic",
+            "1": "Systems",
+            "2": "Home",
+            "3": "Industries",
+            "4": "Solutions",
+            "5": "Articles",
+            "6": "Contact Us"
+        }
+    },
+    "footer": {
+        "text": {
+            "0": "Smart Logic",
+            "1": "Systems",
+            "2": "Explore",
+            "3": "Home",
+            "4": "Industries",
+            "5": "Solutions",
+            "6": "Support",
+            "7": "Articles",
+            "8": "Contact Us",
+            "9": "FAQ",
+            "10": "More",
+            "11": "Privacy Policy",
+            "12": "Terms of Service",
+            "13": "© 2026 Smart Logic Systems. All rights reserved."
+        }
+    },
+    "pages": {
+        "Home": {
+            "Hero": {
+                "text": {
+                    "0": "Enterprise Technology Accelerators",
+                    "1": "Skip the Boilerplate,\nSave the Time and Money\nfor what matters.",
+                    "2": "Smart Logic Systems delivers out-of-the-box accelerators that eliminate weeks of setup, so your team focuses on what matters — building great software.",
+                    "3": "Explore Accelerators",
+                    "4": "Browse Solutions"
+                }
+            },
+            "Clients": {
+                "text": {
+                    "0": "Empowering modern enterprises"
+                }
+            },
+            "Engineering Solutions": {
+                "text": {
+                    "0": "Engineering Solutions That Drive Business Forward",
+                    "1": "01",
+                    "2": "What We Build",
+                    "3": "Accelerator solutions — pre-built, configurable frameworks that let enterprise teams skip setup and ship faster.",
+                    "4": "Production - Ready",
+                    "5": "02",
+                    "6": "How We Work",
+                    "7": "Deep expertise in Wordpress, Azure, and cloud-native stacks. Refined across 20+ enterprise engagements.",
+                    "8": "20+ engagements",
+                    "9": "03",
+                    "10": "Why It Matters",
+                    "11": "Your competitors aren't waiting. SLS accelerators put production-ready software in your hands in weeks, not quarters.",
+                    "12": "Weeks, not quarters"
+                }
+            },
+            "Core Accelerator Solutions": {
+                "text": {
+                    "0": "Core Accelerator Solutions",
+                    "1": "Wordpress Accelerator",
+                    "2": "Start a containerized Wordpress project complete with integrated database backups.",
+                    "3": "Cloud Application Accelerator",
+                    "4": "Deploy cloud applications faster using comprehensive boilerplate infrastructure code.",
+                    "5": "Azure Cloud Solutions",
+                    "6": "Leverage accelerators focused specifically on Azure-based cloud applications.",
+                    "7": "View All Solutions"
+                }
+            },
+            "Call To Action": {
+                "text": {
+                    "0": "Ready to start three weeks ahead?",
+                    "1": "Tell us what you’re building. We’ll tell you which accelerator get you there fastest - and what it saves you.",
+                    "2": "Get in Touch",
+                    "3": "Browse Solutions"
+                }
+            }
+        },
+        "Industries": {
+            "Hero": {
+                "text": {
+                    "0": "Time and Money saved,\nIndustry by Industry",
+                    "1": "Our accelerators are horizontal by design, but the time and cost pressure they relieve looks different in every industry. Here's how our customers are putting them to work.",
+                    "2": "4",
+                    "3": "Industries Served",
+                    "4": "domain-specific accelerators",
+                    "5": "90%",
+                    "6": "Avg. time Reduction",
+                    "7": "vs. build from scratch",
+                    "8": "$1.4M",
+                    "9": "Avg. Cost Avoidance",
+                    "10": "per engagement",
+                    "11": "98%",
+                    "12": "Client Retention",
+                    "13": "return for follow-on work"
+                }
+            },
+            "Features": {
+                "text": {
+                    "0": "Core Accelerator Solutions",
+                    "1": "Financial Technology",
+                    "2": "Financial services teams need infrastructure that is both fast to stand up and defensible in an audit. Our accelerators ship with infrastructure-as-code from the start, giving compliance and security teams a documented, repeatable environment instead of a one-off configuration nobody can explain a year later.",
+                    "3": "Healthcare & Life Sciences",
+                    "4": "Healthcare organizations run on strict compliance timelines and legacy content systems that are expensive to replatform. Our Wordpress Accelerator gives healthcare marketing and patient-portal teams a containerized, backup-ready CMS foundation, so replatforming projects that used to eat a quarter now start delivering content in the first sprint.",
+                    "5": "Real Estate & Management",
+                    "6": "Whether for a single brokerage or a multi-region franchise, real estate microsites must launch faster than a listing goes stale. The Wordpress Accelerator rapidly spins up consistent, on-brand sites for new markets, while the Cloud Application Accelerator instantly deploys production-ready lead-capture and CRM integrations.",
+                    "7": "Data Centers & Infrastructure",
+                    "8": "Data center and colocation providers demand the highest infrastructure standards. That’s why our accelerators ship with infrastructure-as-code and documented environments from day one. Customer portals and internal tools inherit this audit-ready foundation, ensuring security reviews never become a bottleneck."
+                }
+            },
+            "Constraints": {
+                "text": {
+                    "0": "Every Industry has the same two Constraints",
+                    "1": "Regardless of sector, the projects that come to SLS share the same pressure: a deadline that won't move, and a budget that won't grow. Our accelerators attack both at once by removing the infrastructure work that adds neither business value nor competitive advantage — it's the part every project needs, and none should have to rebuild.",
+                    "2": "Cross - Industry Average",
+                    "3": "Standard Build",
+                    "4": "14w",
+                    "5": "Full budget",
+                    "6": "With SLS Accelerator",
+                    "7": "3w",
+                    "8": "-40% budget",
+                    "9": "11 weeks",
+                    "10": "Avg. Time Reclaimed Per Project",
+                    "11": "~60%",
+                    "12": "Avg. Lower Infrastructure Setup Cost"
+                }
+            },
+            "Case Studies": {
+                "text": {
+                    "0": "CASE STUDIES",
+                    "1": "Quantifiable Outcomes, Not Adjectives",
+                    "2": "A few representative engagements, structured around the two things every stakeholder actually asks about: time and money.",
+                    "3": "Financial Technology",
+                    "4": "Cascade Financial",
+                    "5": "Compliance-ready lending portal shipped before the audit",
+                    "6": "Real Estate",
+                    "7": "Meridian Realty Group",
+                    "8": "Data Centers",
+                    "9": "CoreVault DC",
+                    "10": "Financial Technology",
+                    "11": "Cascade Financial — compliance-ready lending portal",
+                    "12": "7 weeks",
+                    "13": "Avg. Time Saved",
+                    "14": "48%",
+                    "15": "LOWER PROJECT COST",
+                    "16": "Cascade Financial needed a new loan-application portal that could pass a compliance audit before its first release. Building that infrastructure from scratch was quoted at eight weeks. Using the Cloud Application Accelerator's infrastructure-as-code baseline, their team had a documented, audit-ready environment in under a week and cleared the pre-launch compliance review on the first pass.",
+                    "17": "Read full story"
+                }
+            },
+            "Call To Action": {
+                "text": {
+                    "0": "See what your industry could save.",
+                    "1": "Tell us about your project and timeline, and we'll map it against the closest accelerator fit.",
+                    "2": "Get in Touch",
+                    "3": "Browse Solutions"
+                }
+            }
+        },
+        "Solutions": {
+            "Hero": {
+                "text": {
+                    "0": "Every accelerator we've built, in one place!",
+                    "1": "Start with our most-used accelerators below, or search the full directory as it grows.",
+                    "2": "SOLUTION FINDER",
+                    "3": "Search Accelerator",
+                    "4": "Wordpress Accelerator",
+                    "5": "Accelerator",
+                    "6": "Database Backup Automation",
+                    "7": "Add-on",
+                    "8": "CI/CD Pipeline Templates",
+                    "9": "Toolkit",
+                    "10": "10+ solutions and counting",
+                    "11": "Browse All"
+                }
+            },
+            "Featured Accelerators": {
+                "text": {
+                    "0": "Our Featured Accelerators",
+                    "1": "Wordpress Accelerator",
+                    "2": "Start a containerized Wordpress project complete with integrated database backups.",
+                    "3": "Docker Compose or Podman Quadlet — matched to how you already operate",
+                    "4": "Automated, scheduled database backups",
+                    "5": "Sensible default content architecture",
+                    "6": "Cloud Application Accelerator",
+                    "7": "Deploy cloud applications faster using comprehensive boilerplate infrastructure code.",
+                    "8": "Terraform-based infrastructure-as-code from day one",
+                    "9": "Virtual network, subnet & security-group provisioning included",
+                    "10": "VM-based or containerized deployment — whichever fits your stack",
+                    "11": "Azure Cloud Solutions",
+                    "12": "Leverage accelerators focused specifically on Azure-based cloud applications.",
+                    "13": "Azure App Service starting point",
+                    "14": "Azure Static Web App starting point",
+                    "15": "More patterns in active development"
+                }
+            },
+            "Methodology": {
+                "text": {
+                    "0": "How it works",
+                    "1": "The SLS Methodology",
+                    "2": "01",
+                    "3": "Assess",
+                    "4": "We map your project against the catalog to find the closest architectural fit.",
+                    "5": "02",
+                    "6": "Select & Configure",
+                    "7": "We tailor the accelerator to your naming, environments, and compliance needs.",
+                    "8": "03",
+                    "9": "Deploy",
+                    "10": "Your team gets a working environment often within the first week ready for feature work.",
+                    "11": "04",
+                    "12": "Extend",
+                    "13": "We stay available to extend the accelerator as your project grows beyond the baseline."
+                }
+            },
+            "Solutions Directory": {
+                "text": {
+                    "0": "Full directory",
+                    "1": "Search every Solution We Offer",
+                    "2": "Search Solutions",
+                    "3": "e.g. \"Wordpress\", \"backup\", \"Azure\"",
+                    "4": "All Solutions",
+                    "5": "Accelerators",
+                    "6": "Add-ons",
+                    "7": "Toolkits",
+                    "8": "Solution",
+                    "9": "Type",
+                    "10": "Best for",
+                    "11": "Wordpress Accelerator",
+                    "12": "Containerized Wordpress project with automated database backup.",
+                    "13": "Accelerator",
+                    "14": "Content-heavy sites & replatforms",
+                    "15": "Cloud Application Accelerator",
+                    "16": "Boilerplate infrastructure code for any new cloud application.",
+                    "17": "Accelerator",
+                    "18": "New product builds, MVPs",
+                    "19": "Azure App Service Starter",
+                    "20": "Pre-configured Azure App Service environment with pipelines.",
+                    "21": "Accelerator",
+                    "22": "Teams standardized on Azure",
+                    "23": "Azure Static Web App Starter",
+                    "24": "Lightweight starting point for static and JAMstack-style apps.",
+                    "25": "Add-on",
+                    "26": "Marketing sites, docs, portals",
+                    "27": "Database Backup Automation",
+                    "28": "Scheduled, monitored backups with restore testing.",
+                    "29": "Add-on",
+                    "30": "Any accelerator, compliance-sensitive projects",
+                    "31": "CI/CD Pipeline Templates",
+                    "32": "Reusable build-and-deploy pipeline definitions.",
+                    "33": "Toolkit",
+                    "34": "Teams standardizing delivery process",
+                    "35": "1",
+                    "36": "2",
+                    "37": "3"
+                }
+            },
+            "FAQ": {
+                "text": {
+                    "0": "Frequently Asked Questions",
+                    "1": "Do accelerators replace custom development?",
+                    "2": "No. Accelerators handle the infrastructure and scaffolding layer — environments, backups, pipelines, containerization — that every project needs but that adds no unique value to yours.",
+                    "3": "Can an accelerator integrate with our existing systems?",
+                    "4": "How is pricing structured?",
+                    "5": "What if we need something not in the directory?",
+                    "6": "Do you support ongoing maintenance after deployment?"
+                }
+            },
+            "Call To Action": {
+                "text": {
+                    "0": "Not sure which accelerator fits?",
+                    "1": "Send us a short description of your project and we'll recommend a starting point — no obligation.",
+                    "2": "Get Recommendations"
+                }
+            }
+        },
+        "Articles": {
+            "Hero": {
+                "text": {
+                    "0": "Insight that Saves you Time.",
+                    "1": "Engineering and business insight from the consultants building SLS's accelerators — written to save you the research time we've already put in."
+                }
+            },
+            "Newsletter": {
+                "text": {
+                    "0": "Get new articles in your inbox",
+                    "1": "One email when we publish. No spam, unsubscribe anytime.",
+                    "2": "you@company.com",
+                    "3": "Subscribe"
+                }
+            }
+        },
+        "Contact Us": {
+            "Hero": {
+                "text": {
+                    "0": "Tell us what you're Building",
+                    "1": "Whether you have a project timeline already or you're just exploring what an accelerator could save you, we'll get back to you within one business day."
+                }
+            },
+            "Connect With Us": {
+                "text": {
+                    "0": "Let's talk",
+                    "1": "Connect With Us",
+                    "2": "New business & sales",
+                    "3": "Project & Sales Inquiries",
+                    "4": "For new project scoping, accelerator recommendations, and pricing.",
+                    "5": "sales@smartlogicsystems.com",
+                    "6": "(555) 019-2200",
+                    "7": "Existing clients",
+                    "8": "Technical Support",
+                    "9": "For active engagements, deployment issues, or accelerator questions.",
+                    "10": "support@smartlogicsystems.com",
+                    "11": "(555) 019-2201",
+                    "12": "New business & sales",
+                    "13": "General Inquiries",
+                    "14": "For press, partnerships, or anything that doesn't fit the categories above.",
+                    "15": "hello@smartlogicsystems.com",
+                    "16": "(555) 019-2267"
+                }
+            },
+            "Contact Form": {
+                "text": {
+                    "0": "Smart Logic",
+                    "1": "Systems",
+                    "2": "Send us a message",
+                    "3": "Name",
+                    "4": "Name",
+                    "5": "Email",
+                    "6": "you@company.com",
+                    "7": "Reason for Inquiry",
+                    "8": "Select Reason...",
+                    "9": "Subject",
+                    "10": "What's this about?",
+                    "11": "Message",
+                    "12": "Your Message...",
+                    "13": "Send message"
+                }
+            }
+        }
+    }
+}
