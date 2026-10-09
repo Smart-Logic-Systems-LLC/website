@@ -956,6 +956,7 @@ h1, h2, h3, h4, p {
 .accelerators {
   position: relative;
   isolation: isolate;
+  overflow-x: clip;
   padding: 141px 0 100px;
 }
 
