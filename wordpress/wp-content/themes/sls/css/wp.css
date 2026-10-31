@@ -1,0 +1,97 @@
+/* ==========================================================================
+   WordPress additions to css/styles.css (which is kept identical to the
+   static site). Only covers what block markup can't express directly.
+   ========================================================================== */
+
+/* Highlight underlines applied with the editor's "Gold/Green underline"
+   formats may carry only the modifier class; give them the base .hl styles. */
+.hl--gold:not(.hl),
+.hl--green:not(.hl) {
+  position: relative;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.hl--gold:not(.hl)::after,
+.hl--green:not(.hl)::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 0.94em;
+  pointer-events: none;
+  background: no-repeat center / 100% 100%;
+}
+
+/* Value-card copy widths (inline custom properties in the static markup). */
+.value-cards > :nth-child(1) .value-card__text { --text-w: 333px; }
+.value-cards > :nth-child(2) .value-card__text { --text-w: 319px; }
+.value-cards > :nth-child(3) .value-card__text { --text-w: 339px; }
+
+/* Industries: the static page keeps this gap via its hidden case-studies section. */
+.constraints + .cta-wrap {
+  margin-top: 100px;
+}
+
+@media (max-width: 1023px) {
+  .constraints + .cta-wrap {
+    margin-top: 88px;
+  }
+}
+
+/* Keep the fixed header below the admin toolbar for logged-in users. */
+.admin-bar .site-header {
+  top: calc(var(--header-top) + var(--wp-admin--admin-bar--height, 32px));
+}
+
+@media (max-width: 760px) {
+  /* Home headline line breaks are desktop-only (".br-lg" in the static site). */
+  .hero--home .display-title br {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  /* The toolbar scrolls away on small screens. */
+  .admin-bar .site-header {
+    top: var(--header-top);
+  }
+}
+
+/* Blog index, archives and single posts (no static-site equivalent). */
+.sls-simple {
+  padding-top: calc(var(--header-top) + var(--header-height) + 80px);
+}
+
+.sls-simple .wp-block-post-template {
+  display: grid;
+  gap: 48px;
+  margin-top: 48px;
+  padding: 0;
+  list-style: none;
+}
+
+.sls-simple .lead {
+  margin-top: 20px;
+}
+
+.sls-simple .section-title a {
+  text-decoration: none;
+}
+
+.sls-prose {
+  max-width: 720px;
+  margin-top: 40px;
+  color: var(--ink-80);
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+.sls-prose > * + * {
+  margin-top: 1.25em;
+}
+
+.sls-prose h2,
+.sls-prose h3 {
+  margin-top: 1.8em;
+  line-height: 1.3;
+}

@@ -1,0 +1,22 @@
+---
+# Settings for the dev environment. Not secret: this repository is public.
+# Passwords are generated into ../secrets/dev/ on first deploy; the admin
+# e-mail is the signed-in Azure CLI user (passed by the Makefile).
+project_name: slswebsite
+domain_name: dev.smartlogicsystems.com
+site_title: Smart Logic Systems
+wp_admin_user: admin
+# Ask search engines not to index this site.
+noindex: true
+
+# Images (multi-arch; the VM is arm64).
+wordpress_image: docker.io/library/wordpress:7.1.2-php8.3-apache
+wpcli_image: docker.io/library/wordpress:cli-2.12.0-php8.3
+db_image: docker.io/library/mariadb:11.8
+caddy_image: docker.io/library/caddy:2.11.7-alpine
+# Outbound mail relay, added once secrets/<env>/smtp.yml exists (see deployment/vm/azure/email.tf).
+relay_image: docker.io/boky/postfix:5.1.0-alpine
+
+# The B2pts_v2 VM has 1 GiB of memory.
+swap_size_mb: 2048
+...

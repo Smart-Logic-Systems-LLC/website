@@ -1,0 +1,44 @@
+# Local WordPress for the Smart Logic Systems block theme.
+# Usage: ./setup.sh (first run and re-seeding); afterwards `podman-compose up -d` / `down`.
+# WP-CLI runs in a throwaway wordpress:cli container from setup.sh.
+# Credentials below are for this local, loopback-only environment.
+name: sls-wp
+
+services:
+  db:
+    image: docker.io/library/mariadb:latest
+    container_name: sls-wp-db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wordpress
+      MARIADB_PASSWORD: wordpress
+      MARIADB_RANDOM_ROOT_PASSWORD: "1"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  wordpress:
+    image: docker.io/library/wordpress:latest
+    container_name: sls-wp
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "127.0.0.1:${SLS_WP_PORT:-8090}:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wp_data:/var/www/html
+      - ./wp-content/themes/sls:/var/www/html/wp-content/themes/sls:ro
+
+volumes:
+  db_data:
+  wp_data:

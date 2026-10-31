@@ -1,0 +1,26 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "sls/contact-links",
+	"title": "Contact Links",
+	"category": "sls",
+	"icon": "email",
+	"description": "Email and phone links for a contact card.",
+	"attributes": {
+		"email": {
+			"type": "string",
+			"default": ""
+		},
+		"phone": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"html": false,
+		"className": false
+	},
+	"textdomain": "sls",
+	"editorScript": "sls-blocks-editor",
+	"render": "file:./render.php"
+}

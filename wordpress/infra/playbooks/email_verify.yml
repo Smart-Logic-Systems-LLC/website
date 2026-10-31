@@ -1,0 +1,59 @@
+---
+# Run after adding the `make email-dns` records at the DNS provider: asks Azure
+# to verify the sending domain (ownership, SPF, DKIM, DKIM2) and waits for the result.
+- name: Verify the mail sending domain
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    email__url: "https://management.azure.com{{ email_domain_id }}"
+    email__api_version: "2025-09-01"
+    email__types: [Domain, SPF, DKIM, DKIM2]
+  tasks:
+    - name: Read the domain's verification status
+      ansible.builtin.command:
+        argv: [az, rest, --method, get, --url, "{{ email__url }}?api-version={{ email__api_version }}"]
+      register: email__before
+      changed_when: false
+
+    - name: Request verification
+      ansible.builtin.command:
+        argv:
+          - az
+          - rest
+          - --method
+          - post
+          - --url
+          - "{{ email__url }}/initiateVerification?api-version={{ email__api_version }}"
+          - --body
+          - "{{ {'verificationType': item} | to_json }}"
+      loop: "{{ email__types }}"
+      when: (email__before.stdout | from_json).properties.verificationStates[item].status != 'Verified'
+      changed_when: true
+
+    - name: Wait for the result
+      ansible.builtin.command:
+        argv: [az, rest, --method, get, --url, "{{ email__url }}?api-version={{ email__api_version }}"]
+      register: email__after
+      changed_when: false
+      until: >-
+        email__types
+        | map('extract', (email__after.stdout | from_json).properties.verificationStates)
+        | map(attribute='status') | reject('in', ['Verified', 'VerificationFailed']) | list | length == 0
+      retries: 30
+      delay: 10
+
+    - name: Check every record verified
+      ansible.builtin.assert:
+        that: email__failed | length == 0
+        fail_msg: >-
+          Not verified: {{ email__failed | join(', ') }}. Check these records at the DNS provider
+          (`make email-dns`), wait for DNS to update, then re-run `make email-verify`.
+        success_msg: >-
+          {{ (email__after.stdout | from_json).name }} is verified. Set email_domain_verified = true
+          in deployment/vm/azure/<env>.tfvars (if not already) and run `make deploy`.
+      vars:
+        email__states: "{{ (email__after.stdout | from_json).properties.verificationStates }}"
+        email__verified: "{{ email__states | dict2items | selectattr('value.status', 'equalto', 'Verified') | map(attribute='key') | list }}"
+        email__failed: "{{ email__types | reject('in', email__verified) | list }}"
+...

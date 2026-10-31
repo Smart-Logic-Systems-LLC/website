@@ -1,0 +1,27 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "sls/site-header",
+	"title": "Site Header",
+	"category": "sls",
+	"icon": "menu",
+	"description": "Fixed header with the brand, primary menu (Appearance › Menus) and contact button.",
+	"attributes": {
+		"ctaLabel": {
+			"type": "string",
+			"default": "Contact Us"
+		},
+		"ctaUrl": {
+			"type": "string",
+			"default": "/contact/"
+		}
+	},
+	"supports": {
+		"html": false,
+		"className": false,
+		"multiple": false
+	},
+	"textdomain": "sls",
+	"editorScript": "sls-blocks-editor",
+	"render": "file:./render.php"
+}

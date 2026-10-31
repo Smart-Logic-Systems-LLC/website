@@ -1,0 +1,51 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "sls/solution-finder",
+	"title": "Solution Finder",
+	"category": "sls",
+	"icon": "search",
+	"description": "Search box and quick links that jump to the solutions directory on the same page.",
+	"attributes": {
+		"title": {
+			"type": "string",
+			"default": "SOLUTION FINDER"
+		},
+		"placeholder": {
+			"type": "string",
+			"default": "Search Accelerator"
+		},
+		"items": {
+			"type": "array",
+			"default": [
+				{
+					"label": "Wordpress Accelerator",
+					"type": "accelerator"
+				},
+				{
+					"label": "Database Backup Automation",
+					"type": "add-on"
+				},
+				{
+					"label": "CI/CD Pipeline Templates",
+					"type": "toolkit"
+				}
+			]
+		},
+		"countText": {
+			"type": "string",
+			"default": "10+ solutions and counting"
+		},
+		"linkLabel": {
+			"type": "string",
+			"default": "Browse All"
+		}
+	},
+	"supports": {
+		"html": false,
+		"className": false
+	},
+	"textdomain": "sls",
+	"editorScript": "sls-blocks-editor",
+	"render": "file:./render.php"
+}

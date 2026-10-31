@@ -1,0 +1,18 @@
+---
+# Removes the site from the VM, including its database and uploads.
+- name: Destroy k8s quadlet resources on vm
+  become: true
+  hosts: all
+  gather_facts: false
+  vars_files: "../env/{{ environment_level }}.yml"
+  pre_tasks:
+    - name: Wait for host to become reachable
+      ansible.builtin.wait_for_connection:
+        delay: 5
+        timeout: 300
+  tasks:
+    - name: Destroy quadlet
+      ansible.builtin.include_role:
+        name: slswebsite_k8s
+        tasks_from: destroy_quadlet.yml
+...

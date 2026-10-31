@@ -1,0 +1,22 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "sls/icon",
+	"title": "Icon",
+	"category": "sls",
+	"icon": "star-filled",
+	"description": "One of the site's SVG icons. Use the Additional CSS class field for the wrapper style, e.g. \"icon-tile\", \"icon-tile icon-tile--gold\" or \"acc-card__arrow\".",
+	"attributes": {
+		"icon": {
+			"type": "string",
+			"default": "server"
+		}
+	},
+	"supports": {
+		"html": false,
+		"className": true
+	},
+	"textdomain": "sls",
+	"editorScript": "sls-blocks-editor",
+	"render": "file:./render.php"
+}

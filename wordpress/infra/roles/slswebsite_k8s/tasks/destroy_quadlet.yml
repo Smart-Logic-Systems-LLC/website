@@ -1,0 +1,30 @@
+---
+- name: Stop systemd service
+  ansible.builtin.systemd_service:
+    state: stopped
+    name: slswebsite
+  failed_when: false
+
+- name: Delete quadlet and app files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ slswebsite_k8s__quadlet_dir }}slswebsite.kube"
+    - "{{ slswebsite_k8s__app_dir }}"
+
+- name: Reload systemd
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+
+- name: Delete volumes (database, uploads, certificates)
+  containers.podman.podman_volume:
+    name: "{{ project_name }}-{{ item }}"
+    state: absent
+  loop:
+    - db-data
+    - wp-data
+    - caddy-data
+    - caddy-config
+    - mail-spool
+...

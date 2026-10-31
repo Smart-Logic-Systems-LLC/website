@@ -1,0 +1,47 @@
+---
+- name: Install podman and rsync
+  ansible.builtin.apt:
+    name:
+      - podman
+      - rsync
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+# 1 GiB of RAM is tight for MariaDB + PHP; swap absorbs spikes.
+- name: Check for swap file
+  ansible.builtin.stat:
+    path: /swapfile
+  register: vm_host__swapfile
+
+- name: Create swap file
+  when: not vm_host__swapfile.stat.exists
+  block:
+    - name: Allocate swap file
+      ansible.builtin.command: "fallocate -l {{ swap_size_mb }}M /swapfile"
+      changed_when: true
+
+    - name: Restrict swap file permissions
+      ansible.builtin.file:
+        path: /swapfile
+        mode: '0600'
+
+    - name: Format swap file
+      ansible.builtin.command: mkswap /swapfile
+      changed_when: true
+
+    - name: Enable swap file
+      ansible.builtin.command: swapon /swapfile
+      changed_when: true
+
+- name: Enable swap on boot
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    line: /swapfile none swap sw 0 0
+
+- name: Prefer RAM over swap
+  ansible.posix.sysctl:
+    name: vm.swappiness
+    value: '10'
+    sysctl_file: /etc/sysctl.d/90-swappiness.conf
+...

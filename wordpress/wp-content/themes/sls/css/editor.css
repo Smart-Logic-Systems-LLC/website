@@ -1,0 +1,77 @@
+/* Editor canvas only: make the fixed/absolute site chrome editable in place. */
+
+.site-header {
+  position: relative;
+  inset: auto;
+  padding-block: 16px;
+}
+
+/* The editor makes every block position: relative; decorative layers must stay
+   absolutely positioned behind the content (as on the front end). */
+.hero__decor,
+.cta__decor,
+.hero__grid,
+.hero__glow,
+.cta__grid,
+.cta__logo,
+.glow {
+  position: absolute !important;
+  margin: 0 !important;
+}
+
+.hero__decor,
+.cta__decor {
+  pointer-events: none;
+}
+
+/* In the editor, image classes sit on the <figure>; size the image to it. */
+figure.hero__grid img,
+figure.cta__grid img,
+figure.cta__logo img {
+  width: 100%;
+  max-width: none;
+}
+
+/* Step numbers are rendered as <span> on the front end (".step__num span");
+   in the editor they are still the paragraph block. */
+.step__num > p {
+  display: grid;
+  place-items: center;
+  width: 105px;
+  height: 105px;
+  border: 2px solid var(--green);
+  border-radius: 50%;
+  color: rgb(45 177 121 / 0.5);
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -1.5px;
+}
+
+/* Links inside server-rendered previews shouldn't navigate away from the editor. */
+.sls-block-preview a,
+.sls-block-preview button,
+.sls-block-preview input,
+.sls-block-preview select,
+.sls-block-preview textarea {
+  pointer-events: none;
+}
+
+/* Empty glow groups: keep them selectable in List View without a placeholder box. */
+.glow.block-editor-block-list__block,
+.hero__glow.block-editor-block-list__block {
+  min-height: 0;
+}
+
+/* Button blocks: the .btn classes sit on the wrapper in the editor, so the
+   inner link should not draw core's default button style on top. */
+.wp-block-button.btn > .wp-block-button__link {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  color: inherit !important;
+  font: inherit !important;
+  letter-spacing: inherit !important;
+  box-shadow: none !important;
+}

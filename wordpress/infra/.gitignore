@@ -1,0 +1,10 @@
+# OpenTofu state, generated SSH key and inventory (hold secrets / addresses)
+.terraform/
+*.tfstate*
+*.pem
+*.inventory.ini
+*.tfplan
+# Generated passwords (see roles/slswebsite_k8s/defaults/main.yml)
+secrets/
+.known_hosts
+.venv/

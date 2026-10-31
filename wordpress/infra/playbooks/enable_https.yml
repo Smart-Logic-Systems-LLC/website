@@ -1,0 +1,95 @@
+---
+# Run once DNS points at the VM: checks public DNS, makes Caddy request its
+# certificate now (instead of waiting out its retry backoff) and waits until
+# the site serves a trusted certificate.
+- name: Enable HTTPS for the site
+  hosts: all
+  become: true
+  gather_facts: false
+  vars_files: "../env/{{ environment_level }}.yml"
+  vars:
+    https__url: "https://{{ domain_name }}/"
+  tasks:
+    - name: Look up the domain in public DNS
+      ansible.builtin.uri:
+        url: "https://dns.google/resolve?name={{ domain_name }}&type=A"
+        return_content: true
+      delegate_to: localhost
+      become: false
+      register: https__dns
+
+    - name: Check that the domain points at this VM
+      ansible.builtin.assert:
+        that: ansible_host in https__dns_ips
+        fail_msg: >-
+          {{ domain_name }} resolves to {{ https__dns_ips | join(', ') or 'nothing' }} in public DNS, not {{ ansible_host }}.
+          Add an A record "{{ domain_name.split('.')[0] }}" -> {{ ansible_host }} at the DNS provider and retry once it resolves.
+        success_msg: "{{ domain_name }} -> {{ ansible_host }}"
+      vars:
+        https__dns_ips: "{{ https__dns.json.Answer | default([]) | selectattr('type', 'equalto', 1) | map(attribute='data') | list }}"
+
+    - name: Check HTTPS
+      ansible.builtin.uri:
+        url: "{{ https__url }}"
+        validate_certs: true
+      delegate_to: localhost
+      become: false
+      register: https__before
+      failed_when: false
+
+    - name: Request the certificate
+      when: https__before.status != 200
+      block:
+        # Caddy retries with growing gaps; a restart retries immediately.
+        - name: Restart Caddy
+          ansible.builtin.command: "podman restart {{ project_name }}-pod-caddy"
+          changed_when: true
+
+        - name: Wait for a trusted certificate
+          ansible.builtin.uri:
+            url: "{{ https__url }}"
+            validate_certs: true
+          delegate_to: localhost
+          become: false
+          register: https__after
+          until: https__after.status == 200
+          retries: 30
+          delay: 10
+
+      rescue:
+        - name: Read Caddy's log
+          ansible.builtin.command: "podman logs --since 15m {{ project_name }}-pod-caddy"
+          register: https__caddy_log
+          changed_when: false
+
+        - name: Report Caddy's errors
+          ansible.builtin.fail:
+            msg:
+              - "No trusted certificate after 5 minutes. Caddy's latest errors:"
+              - "{{ ((https__caddy_log.stdout_lines + https__caddy_log.stderr_lines) | select('search', '\"level\":\"error\"') | list)[-3:] }}"
+              - "After repeated failures Let's Encrypt pauses this hostname for up to an hour; Caddy keeps retrying."
+
+    - name: Check that HTTP redirects to HTTPS
+      ansible.builtin.uri:
+        url: "http://{{ domain_name }}/"
+        follow_redirects: none
+        status_code: [301, 302, 307, 308]
+      delegate_to: localhost
+      become: false
+
+    - name: Read the certificate
+      ansible.builtin.shell: |
+        set -o pipefail
+        openssl s_client -connect {{ domain_name }}:443 -servername {{ domain_name }} </dev/null 2>/dev/null \
+          | openssl x509 -noout -subject -issuer -enddate
+      args:
+        executable: /bin/bash
+      delegate_to: localhost
+      become: false
+      register: https__cert
+      changed_when: false
+
+    - name: Show the result
+      ansible.builtin.debug:
+        msg: "{{ ['HTTPS is live: ' ~ https__url] + https__cert.stdout_lines }}"
+...

@@ -1,0 +1,15 @@
+[Unit]
+Description=Kubernetes based deployment for SLS' WordPress website ({{ environment_level }})
+Wants=network-online.target
+After=network-online.target
+
+[Kube]
+Yaml={{ slswebsite_k8s__app_dir }}deployment.yml
+
+[Service]
+# Images are pre-pulled by Ansible; allow for a slow first start anyway.
+TimeoutStartSec=600
+
+[Install]
+# Start by default on boot
+WantedBy=multi-user.target default.target

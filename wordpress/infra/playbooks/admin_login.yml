@@ -1,0 +1,84 @@
+---
+# Checks that the wp-admin account can log in over HTTPS and prints its login.
+# With reset_password=true, first sets the account's password back to the one
+# stored in secrets/<env>/ (e.g. after it was changed in wp-admin).
+- name: Check the WordPress admin login
+  hosts: all
+  become: true
+  gather_facts: false
+  vars_files:
+    - "../env/{{ environment_level }}.yml"
+    - ../roles/slswebsite_k8s/defaults/main.yml
+  vars:
+    login__url: "https://{{ domain_name }}/wp-login.php"
+    login__reset_password: false
+  tasks:
+    # The password lookup would silently generate a new password if the file were missing.
+    - name: Check the stored password exists
+      ansible.builtin.stat:
+        path: "{{ slswebsite_k8s__secrets_dir }}wp_admin_password"
+      delegate_to: localhost
+      become: false
+      register: login__secret
+
+    - name: Require the stored password
+      ansible.builtin.assert:
+        that: login__secret.stat.exists
+        fail_msg: "{{ slswebsite_k8s__secrets_dir }}wp_admin_password is missing; run `make app-deploy` from the machine that first deployed this environment."
+        quiet: true
+
+    - name: Check the account is an administrator
+      ansible.builtin.command:
+        argv: "{{ slswebsite_k8s__wp_cli + [wpcli_image, 'wp', 'user', 'get', wp_admin_user, '--field=roles'] }}"
+      register: login__roles
+      changed_when: false
+      failed_when: login__roles.rc != 0 or 'administrator' not in login__roles.stdout
+
+    - name: Reset the password to the stored one
+      ansible.builtin.command:
+        argv: "{{ slswebsite_k8s__wp_cli + [wpcli_image, 'wp', 'user', 'update', wp_admin_user,
+          '--user_pass=' ~ slswebsite_k8s__admin_password, '--skip-email'] }}"
+      when: login__reset_password | bool
+      no_log: true
+      changed_when: true
+
+    - name: Log in over HTTPS
+      ansible.builtin.uri:
+        url: "{{ login__url }}"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          log: "{{ wp_admin_user }}"
+          pwd: "{{ slswebsite_k8s__admin_password }}"
+          redirect_to: "https://{{ domain_name }}/wp-admin/"
+          testcookie: "1"
+        headers:
+          Cookie: wordpress_test_cookie=WP%20Cookie%20check
+        follow_redirects: none
+        status_code: [200, 302]
+      delegate_to: localhost
+      become: false
+      no_log: true
+      register: login__response
+
+    # WordPress answers a good login with a redirect to wp-admin and a session cookie;
+    # a bad one re-renders the form (200).
+    - name: Check the login succeeded
+      ansible.builtin.assert:
+        that:
+          - login__response.status == 302
+          - "'/wp-admin/' in login__response.location | default('')"
+          - "'wordpress_logged_in' in login__response.set_cookie | default('')"
+        fail_msg: >-
+          WordPress rejected the stored password for "{{ wp_admin_user }}" (HTTP {{ login__response.status }}).
+          If it was changed in wp-admin, run `make login RESET_PASSWORD=1`.
+        quiet: true
+
+    - name: Show the login
+      ansible.builtin.debug:
+        msg:
+          - "Login verified."
+          - "URL:      https://{{ domain_name }}/wp-admin/"
+          - "User:     {{ wp_admin_user }}"
+          - "Password: {{ slswebsite_k8s__admin_password }}"
+...

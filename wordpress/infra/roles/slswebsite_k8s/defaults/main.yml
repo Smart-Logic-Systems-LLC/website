@@ -1,0 +1,43 @@
+---
+slswebsite_k8s__quadlet_dir: "/etc/containers/systemd/"
+slswebsite_k8s__app_dir: "/opt/{{ project_name }}/"
+slswebsite_k8s__pod: "{{ project_name }}-pod"
+
+# Run the page seed with SLS_SEED_KEEP unset, replacing page content edited in
+# wp-admin with the theme's patterns (`make app-deploy RESEED=1`).
+slswebsite_k8s__reseed: false
+
+# Generated on first use and kept on the control machine (gitignored).
+slswebsite_k8s__secrets_dir: "{{ playbook_dir }}/../secrets/{{ environment_level }}/"
+slswebsite_k8s__db_password: >-
+  {{ lookup('ansible.builtin.password', slswebsite_k8s__secrets_dir ~ 'db_password', chars=['ascii_letters', 'digits'], length=32) }}
+slswebsite_k8s__admin_password: >-
+  {{ lookup('ansible.builtin.password', slswebsite_k8s__secrets_dir ~ 'wp_admin_password', chars=['ascii_letters', 'digits'], length=24) }}
+
+# Outbound mail goes through the relay container once OpenTofu has written
+# secrets/<env>/smtp.yml (smtp_relay_* variables), i.e. after the sending domain is verified.
+slswebsite_k8s__mail_relay: "{{ smtp_relay_password is defined }}"
+
+# WP-CLI in a throwaway container inside the site's pod (database on 127.0.0.1).
+# Append extra `podman run` options, then the image and the wp arguments.
+slswebsite_k8s__wp_cli:
+  - podman
+  - run
+  - --rm
+  # Containers joining the pod otherwise inherit its restart policy (always).
+  - --restart=no
+  - --pod
+  - "{{ slswebsite_k8s__pod }}"
+  - --user
+  - "33:33"
+  - --env-file
+  - "{{ slswebsite_k8s__app_dir }}wpcli.env"
+  - --volume
+  - "{{ project_name }}-wp-data:/var/www/html"
+  - --volume
+  - "{{ slswebsite_k8s__app_dir }}theme:/var/www/html/wp-content/themes/sls:ro"
+  - --volume
+  - "{{ slswebsite_k8s__app_dir }}seed:/seed:ro"
+  - --volume
+  - "{{ slswebsite_k8s__app_dir }}mu-plugins:/var/www/html/wp-content/mu-plugins:ro"
+...

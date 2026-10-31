@@ -1,0 +1,151 @@
+---
+- name: Look for mail relay credentials
+  ansible.builtin.stat:
+    path: "{{ slswebsite_k8s__secrets_dir }}smtp.yml"
+  delegate_to: localhost
+  become: false
+  register: slswebsite_k8s__smtp_file
+
+- name: Load mail relay credentials
+  ansible.builtin.include_vars:
+    file: "{{ slswebsite_k8s__secrets_dir }}smtp.yml"
+  when: slswebsite_k8s__smtp_file.stat.exists
+  no_log: true
+
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    mode: '0755'
+  loop:
+    - "{{ slswebsite_k8s__quadlet_dir }}"
+    - "{{ slswebsite_k8s__app_dir }}"
+    - "{{ slswebsite_k8s__app_dir }}apache"
+    - "{{ slswebsite_k8s__app_dir }}mu-plugins"
+
+# Mounted read-only as wp-content/mu-plugins; changes are live without a restart.
+- name: Install the mail relay plugin
+  ansible.builtin.copy:
+    src: mu-plugins/sls-mail-relay.php
+    dest: "{{ slswebsite_k8s__app_dir }}mu-plugins/sls-mail-relay.php"
+    owner: root
+    mode: '0644'
+  when: slswebsite_k8s__mail_relay | bool
+
+- name: Remove the mail relay plugin
+  ansible.builtin.file:
+    path: "{{ slswebsite_k8s__app_dir }}mu-plugins/sls-mail-relay.php"
+    state: absent
+  when: not slswebsite_k8s__mail_relay | bool
+
+# The theme is bind-mounted read-only, so theme changes are live without a restart.
+- name: Sync theme and seed script
+  ansible.posix.synchronize:
+    src: "{{ playbook_dir }}/../../{{ item.src }}"
+    dest: "{{ slswebsite_k8s__app_dir }}{{ item.dest }}"
+    delete: true
+    use_ssh_args: true
+    rsync_opts:
+      - "--chmod=D755,F644"
+      - "--chown=root:root"
+  loop:
+    - { src: 'wp-content/themes/sls/', dest: 'theme' }
+    - { src: 'seed/', dest: 'seed' }
+
+- name: Copy Apache config
+  ansible.builtin.copy:
+    src: "apache/{{ item }}"
+    dest: "{{ slswebsite_k8s__app_dir }}apache/{{ item }}"
+    owner: root
+    mode: '0644'
+  loop:
+    - ports.conf
+    - 000-default.conf
+  notify: Restart slswebsite
+
+- name: Template files
+  ansible.builtin.template:
+    src: "{{ item.file }}.j2"
+    dest: "{{ item.dir }}{{ item.file }}"
+    owner: root
+    mode: "{{ item.mode }}"
+  loop:
+    - { file: 'slswebsite.kube', dir: "{{ slswebsite_k8s__quadlet_dir }}", mode: '0644' }
+    - { file: 'deployment.yml', dir: "{{ slswebsite_k8s__app_dir }}", mode: '0600' }
+    - { file: 'Caddyfile', dir: "{{ slswebsite_k8s__app_dir }}", mode: '0644' }
+    - { file: 'wpcli.env', dir: "{{ slswebsite_k8s__app_dir }}", mode: '0600' }
+  notify: Restart slswebsite
+
+- name: Pull images
+  containers.podman.podman_image:
+    name: "{{ item }}"
+  loop: "{{ [caddy_image, wordpress_image, db_image, wpcli_image] + ([relay_image] if slswebsite_k8s__mail_relay | bool else []) }}"
+
+- name: Apply configuration changes
+  ansible.builtin.meta: flush_handlers
+
+- name: Start systemd service
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+    state: started
+    name: slswebsite
+
+# WordPress writes wp-config.php on its first start; MariaDB initialises its data dir.
+- name: Wait for WordPress and the database
+  ansible.builtin.command:
+    argv: "{{ slswebsite_k8s__wp_cli + [wpcli_image, 'wp', 'db', 'query', 'SELECT 1'] }}"
+  register: slswebsite_k8s__db_ready
+  until: slswebsite_k8s__db_ready.rc == 0
+  retries: 40
+  delay: 5
+  changed_when: false
+
+- name: Check whether WordPress is installed
+  ansible.builtin.command:
+    argv: "{{ slswebsite_k8s__wp_cli + [wpcli_image, 'wp', 'core', 'is-installed'] }}"
+  register: slswebsite_k8s__installed
+  failed_when: slswebsite_k8s__installed.rc not in [0, 1]
+  changed_when: false
+
+- name: Install WordPress
+  ansible.builtin.command:
+    argv: "{{ slswebsite_k8s__wp_cli + [wpcli_image, 'wp', 'core', 'install',
+      '--url=https://' ~ domain_name, '--title=' ~ site_title,
+      '--admin_user=' ~ wp_admin_user, '--admin_password=' ~ slswebsite_k8s__admin_password,
+      '--admin_email=' ~ admin_email, '--skip-email'] }}"
+  when: slswebsite_k8s__installed.rc == 1
+  no_log: true
+  changed_when: true
+
+- name: Activate the sls theme
+  ansible.builtin.command:
+    argv: "{{ slswebsite_k8s__wp_cli + [wpcli_image, 'wp', 'theme', 'activate', 'sls'] }}"
+  register: slswebsite_k8s__theme
+  changed_when: "'Switched' in slswebsite_k8s__theme.stdout"
+
+- name: Set site options
+  ansible.builtin.command:
+    argv: "{{ slswebsite_k8s__wp_cli + [wpcli_image, 'wp'] + item }}"
+  loop:
+    - ['rewrite', 'structure', '/%postname%/']
+    - ['option', 'update', 'blog_public', "{{ '0' if noindex else '1' }}"]
+  changed_when: false
+
+# Pages are created from the theme's patterns. Content edited in wp-admin is kept
+# unless this is a fresh install or RESEED=1.
+- name: Seed pages, front page and menu
+  ansible.builtin.command:
+    argv: "{{ slswebsite_k8s__wp_cli + seed_env + [wpcli_image, 'wp', 'eval-file', '/seed/seed.php', '--user=' ~ wp_admin_user] }}"
+  vars:
+    seed_fresh: "{{ slswebsite_k8s__installed.rc == 1 }}"
+    seed_env: >-
+      {{ (['-e', 'SLS_FRESH_INSTALL=1'] if seed_fresh else [])
+         + ([] if (seed_fresh or slswebsite_k8s__reseed | bool) else ['-e', 'SLS_SEED_KEEP=1']) }}
+  register: slswebsite_k8s__seed
+  changed_when: true
+
+- name: Show seed output
+  ansible.builtin.debug:
+    var: slswebsite_k8s__seed.stdout_lines
+...

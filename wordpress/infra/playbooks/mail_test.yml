@@ -1,0 +1,62 @@
+---
+# Sends a test email with wp_mail() and confirms in the relay's log that Azure
+# accepted it. Recipient: mail__to (the Makefile's TO, default the Azure CLI user).
+- name: Send a test email through the mail relay
+  hosts: all
+  become: true
+  gather_facts: false
+  vars_files:
+    - "../env/{{ environment_level }}.yml"
+    - ../roles/slswebsite_k8s/defaults/main.yml
+  vars:
+    mail__relay: "{{ project_name }}-pod-relay"
+  tasks:
+    - name: Check the recipient
+      ansible.builtin.assert:
+        that: mail__to is match('^[^@\s]+@[^@\s]+\.[^@\s]+$')
+        fail_msg: "Not an email address: {{ mail__to }}"
+        quiet: true
+
+    - name: Check the relay is running
+      ansible.builtin.command: "podman container exists {{ mail__relay }}"
+      register: mail__exists
+      changed_when: false
+      failed_when: false
+
+    - name: Require the relay
+      ansible.builtin.assert:
+        that: mail__exists.rc == 0
+        fail_msg: >-
+          The mail relay isn't deployed. Verify the sending domain (`make email-verify`), set
+          email_domain_verified = true in deployment/vm/azure/<env>.tfvars and run `make deploy`.
+        quiet: true
+
+    - name: Send the email
+      ansible.builtin.command:
+        argv: "{{ slswebsite_k8s__wp_cli + ['-e', 'MAIL_TO=' ~ mail__to, wpcli_image, 'wp', 'eval', mail__php] }}"
+      vars:
+        mail__php: >-
+          add_action( 'wp_mail_failed', function ( $e ) { WP_CLI::error( $e->get_error_message() ); } );
+          wp_mail( getenv( 'MAIL_TO' ), 'Test email from ' . home_url(),
+          "This is a test message from `make mail-test`, sent by WordPress through the site's mail relay." );
+      register: mail__send
+      changed_when: true
+
+    - name: Wait for the relay to hand it to Azure
+      ansible.builtin.command: "podman logs --since 5m {{ mail__relay }}"
+      register: mail__log
+      changed_when: false
+      until: mail__lines | length > 0
+      retries: 12
+      delay: 5
+      vars:
+        mail__lines: "{{ (mail__log.stdout_lines + mail__log.stderr_lines) | select('search', 'to=<' ~ mail__to ~ '>.*status=') | list }}"
+
+    - name: Check Azure accepted it
+      ansible.builtin.assert:
+        that: "'status=sent' in mail__result"
+        fail_msg: "The relay could not hand the message to Azure: {{ mail__result }}"
+        success_msg: "Accepted by Azure Communication Services for delivery to {{ mail__to }}. Check that inbox (and its spam folder)."
+      vars:
+        mail__result: "{{ ((mail__log.stdout_lines + mail__log.stderr_lines) | select('search', 'to=<' ~ mail__to ~ '>.*status=') | list)[-1] }}"
+...

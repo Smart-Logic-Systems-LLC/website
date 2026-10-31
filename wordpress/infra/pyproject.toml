@@ -1,0 +1,10 @@
+[project]
+name = "slswebsite-wordpress-infra"
+version = "0.1.0"
+description = "Deploy the WordPress site to an Azure VM as a Podman quadlet"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "ansible>=13.6.0",
+    "ansible-lint>=26.4.0",
+]

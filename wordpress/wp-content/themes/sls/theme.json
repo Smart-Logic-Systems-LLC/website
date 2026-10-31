@@ -1,0 +1,61 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"settings": {
+		"appearanceTools": false,
+		"useRootPaddingAwareAlignments": false,
+		"color": {
+			"custom": true,
+			"customGradient": false,
+			"defaultDuotone": false,
+			"defaultGradients": false,
+			"defaultPalette": false,
+			"palette": [
+				{ "slug": "dark-blue", "name": "Dark blue", "color": "#1b2955" },
+				{ "slug": "sky-blue", "name": "Sky blue", "color": "#4d93cc" },
+				{ "slug": "ocean", "name": "Ocean", "color": "#2b81c7" },
+				{ "slug": "green", "name": "Green", "color": "#2db179" },
+				{ "slug": "gold", "name": "Gold", "color": "#d4b13e" },
+				{ "slug": "navy", "name": "Navy", "color": "#171e34" },
+				{ "slug": "black", "name": "Black", "color": "#131313" },
+				{ "slug": "white", "name": "White", "color": "#ffffff" }
+			]
+		},
+		"spacing": {
+			"blockGap": false,
+			"margin": false,
+			"padding": false
+		},
+		"typography": {
+			"customFontSize": false,
+			"defaultFontSizes": false,
+			"dropCap": false,
+			"fontFamilies": [
+				{
+					"slug": "sans",
+					"name": "Google Sans Flex",
+					"fontFamily": "'Google Sans Flex', 'Google Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+				},
+				{
+					"slug": "mono",
+					"name": "Google Sans Code",
+					"fontFamily": "'Google Sans Code', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace"
+				},
+				{
+					"slug": "serif",
+					"name": "Fraunces",
+					"fontFamily": "'Fraunces', Georgia, 'Times New Roman', serif"
+				}
+			]
+		}
+	},
+	"styles": {
+		"spacing": {
+			"blockGap": "0"
+		}
+	},
+	"templateParts": [
+		{ "name": "header", "title": "Header", "area": "header" },
+		{ "name": "footer", "title": "Footer", "area": "footer" }
+	]
+}

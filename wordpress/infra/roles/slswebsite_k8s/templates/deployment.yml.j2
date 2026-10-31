@@ -1,0 +1,150 @@
+---
+# One pod: Caddy (TLS on 80/443) -> WordPress/Apache (127.0.0.1:8080) -> MariaDB (127.0.0.1:3306),
+# plus the Postfix mail relay (127.0.0.1:587) once mail is set up.
+# Containers in a pod share its network namespace; only Caddy publishes host ports.
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ project_name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ project_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ project_name }}
+    spec:
+      containers:
+        - name: caddy
+          image: {{ caddy_image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              hostPort: 80
+            - containerPort: 443
+              hostPort: 443
+          volumeMounts:
+            - name: caddyfile
+              mountPath: /etc/caddy/Caddyfile
+              readOnly: true
+            - name: caddy-data
+              mountPath: /data
+            - name: caddy-config
+              mountPath: /config
+
+        - name: wordpress
+          image: {{ wordpress_image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: WORDPRESS_DB_HOST
+              value: "127.0.0.1:3306"
+            - name: WORDPRESS_DB_NAME
+              value: wordpress
+            - name: WORDPRESS_DB_USER
+              value: wordpress
+            - name: WORDPRESS_DB_PASSWORD
+              value: "{{ slswebsite_k8s__db_password }}"
+            - name: WORDPRESS_CONFIG_EXTRA
+              value: "define( 'DISALLOW_FILE_EDIT', true );"
+          volumeMounts:
+            - name: wp-data
+              mountPath: /var/www/html
+            - name: theme
+              mountPath: /var/www/html/wp-content/themes/sls
+              readOnly: true
+            - name: mu-plugins
+              mountPath: /var/www/html/wp-content/mu-plugins
+              readOnly: true
+            - name: apache-ports
+              mountPath: /etc/apache2/ports.conf
+              readOnly: true
+            - name: apache-site
+              mountPath: /etc/apache2/sites-enabled/000-default.conf
+              readOnly: true
+
+        - name: db
+          image: {{ db_image }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MARIADB_DATABASE
+              value: wordpress
+            - name: MARIADB_USER
+              value: wordpress
+            - name: MARIADB_PASSWORD
+              value: "{{ slswebsite_k8s__db_password }}"
+            - name: MARIADB_RANDOM_ROOT_PASSWORD
+              value: "1"
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/mysql
+{% if slswebsite_k8s__mail_relay | bool %}
+
+        # WordPress -> 127.0.0.1:587 -> Azure Communication Services (smtp.azurecomm.net:587).
+        - name: relay
+          image: {{ relay_image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 587
+          env:
+            - name: RELAYHOST
+              value: "[{{ smtp_relay_host }}]:{{ smtp_relay_port }}"
+            - name: RELAYHOST_USERNAME
+              value: "{{ smtp_relay_username }}"
+            - name: RELAYHOST_PASSWORD
+              value: "{{ smtp_relay_password }}"
+            - name: ALLOWED_SENDER_DOMAINS
+              value: "{{ smtp_sender.split('@')[1] }}"
+            - name: POSTFIX_myhostname
+              value: "{{ domain_name }}"
+            - name: POSTFIX_mynetworks
+              value: "127.0.0.0/8"
+            - name: POSTFIX_smtp_tls_security_level
+              value: encrypt
+          volumeMounts:
+            - name: mail-spool
+              mountPath: /var/spool/postfix
+{% endif %}
+
+      volumes:
+        - name: caddyfile
+          hostPath:
+            path: {{ slswebsite_k8s__app_dir }}Caddyfile
+            type: File
+        - name: caddy-data
+          persistentVolumeClaim:
+            claimName: {{ project_name }}-caddy-data
+        - name: caddy-config
+          persistentVolumeClaim:
+            claimName: {{ project_name }}-caddy-config
+        - name: wp-data
+          persistentVolumeClaim:
+            claimName: {{ project_name }}-wp-data
+        - name: theme
+          hostPath:
+            path: {{ slswebsite_k8s__app_dir }}theme
+            type: Directory
+        - name: mu-plugins
+          hostPath:
+            path: {{ slswebsite_k8s__app_dir }}mu-plugins
+            type: Directory
+        - name: apache-ports
+          hostPath:
+            path: {{ slswebsite_k8s__app_dir }}apache/ports.conf
+            type: File
+        - name: apache-site
+          hostPath:
+            path: {{ slswebsite_k8s__app_dir }}apache/000-default.conf
+            type: File
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: {{ project_name }}-db-data
+{% if slswebsite_k8s__mail_relay | bool %}
+        - name: mail-spool
+          persistentVolumeClaim:
+            claimName: {{ project_name }}-mail-spool
+{% endif %}
+...

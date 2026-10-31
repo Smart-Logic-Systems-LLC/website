@@ -1,0 +1,51 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "sls/contact-form",
+	"title": "Contact Form Panel",
+	"category": "sls",
+	"icon": "feedback",
+	"description": "Branded panel with the contact form. Without an endpoint, submitting opens the visitor's email app addressed to the chosen reason's inbox.",
+	"attributes": {
+		"title": {
+			"type": "string",
+			"default": "Send us a message"
+		},
+		"submitLabel": {
+			"type": "string",
+			"default": "Send message"
+		},
+		"endpoint": {
+			"type": "string",
+			"default": ""
+		},
+		"reasons": {
+			"type": "array",
+			"default": [
+				{
+					"value": "sales",
+					"label": "Project & Sales Inquiries",
+					"email": "sales@smartlogicsystems.com"
+				},
+				{
+					"value": "support",
+					"label": "Technical Support",
+					"email": "support@smartlogicsystems.com"
+				},
+				{
+					"value": "general",
+					"label": "General Inquiries",
+					"email": "hello@smartlogicsystems.com"
+				}
+			]
+		}
+	},
+	"supports": {
+		"html": false,
+		"className": false,
+		"multiple": false
+	},
+	"textdomain": "sls",
+	"editorScript": "sls-blocks-editor",
+	"render": "file:./render.php"
+}

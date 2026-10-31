@@ -1,0 +1,13 @@
+{
+	# ACME account contact for Let's Encrypt / ZeroSSL.
+	email {{ admin_email }}
+}
+
+# Certificates are issued automatically once DNS points here (HTTP-01 / TLS-ALPN-01).
+{{ domain_name }} {
+	encode zstd gzip
+{% if noindex %}
+	header X-Robots-Tag "noindex, nofollow"
+{% endif %}
+	reverse_proxy 127.0.0.1:8080
+}

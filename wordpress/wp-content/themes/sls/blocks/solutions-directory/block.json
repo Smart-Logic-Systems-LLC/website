@@ -1,0 +1,72 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "sls/solutions-directory",
+	"title": "Solutions Directory",
+	"category": "sls",
+	"icon": "list-view",
+	"description": "Searchable, filterable, paginated table of solutions.",
+	"attributes": {
+		"searchLabel": {
+			"type": "string",
+			"default": "Search Solutions"
+		},
+		"placeholder": {
+			"type": "string",
+			"default": "e.g. \"Wordpress\", \"backup\", \"Azure\""
+		},
+		"emptyText": {
+			"type": "string",
+			"default": "No solutions match your search."
+		},
+		"rows": {
+			"type": "array",
+			"default": [
+				{
+					"name": "Wordpress Accelerator",
+					"desc": "Containerized Wordpress project with automated database backup.",
+					"type": "accelerator",
+					"best": "Content-heavy sites & replatforms"
+				},
+				{
+					"name": "Cloud Application Accelerator",
+					"desc": "Boilerplate infrastructure code for any new cloud application.",
+					"type": "accelerator",
+					"best": "New product builds, MVPs"
+				},
+				{
+					"name": "Azure App Service Starter",
+					"desc": "Pre-configured Azure App Service environment with pipelines.",
+					"type": "accelerator",
+					"best": "Teams standardized on Azure"
+				},
+				{
+					"name": "Azure Static Web App Starter",
+					"desc": "Lightweight starting point for static and JAMstack-style apps.",
+					"type": "add-on",
+					"best": "Marketing sites, docs, portals"
+				},
+				{
+					"name": "Database Backup Automation",
+					"desc": "Scheduled, monitored backups with restore testing.",
+					"type": "add-on",
+					"best": "Any accelerator, compliance-sensitive projects"
+				},
+				{
+					"name": "CI/CD Pipeline Templates",
+					"desc": "Reusable build-and-deploy pipeline definitions.",
+					"type": "toolkit",
+					"best": "Teams standardizing delivery process"
+				}
+			]
+		}
+	},
+	"supports": {
+		"html": false,
+		"className": false,
+		"multiple": false
+	},
+	"textdomain": "sls",
+	"editorScript": "sls-blocks-editor",
+	"render": "file:./render.php"
+}
