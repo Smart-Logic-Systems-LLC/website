@@ -1,0 +1,37 @@
+---
+# The site's subdomain is delegated to the Azure DNS zone (deployment/vm/azure/dns.tf).
+# Checks public DNS for the delegation and, until it is live, prints the NS
+# records to add at the parent domain's DNS provider (GoDaddy).
+- name: Check the DNS delegation
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files: "../env/{{ environment_level }}.yml"
+  vars:
+    dns__host: "{{ domain_name.split('.')[0] }}"
+    dns__expected: "{{ dns__name_servers | map('lower') | map('regex_replace', '\\.$', '') | sort }}"
+  tasks:
+    - name: Look up the subdomain's nameservers in public DNS
+      ansible.builtin.uri:
+        url: "https://dns.google/resolve?name={{ domain_name }}&type=NS"
+        return_content: true
+      register: dns__lookup
+
+    - name: Check the subdomain is delegated to Azure DNS
+      ansible.builtin.assert:
+        that: dns__actual == dns__expected
+        fail_msg: |-
+          {{ domain_name }} is not delegated to Azure DNS yet (public nameservers: {{ dns__actual | join(', ') or 'none' }}).
+          At GoDaddy, in the DNS records of {{ domain_name.split('.', 1)[1] }}:
+            1. delete the A (or CNAME) record with name "{{ dns__host }}"; Azure DNS serves it from now on
+            2. add these NS records, each with name "{{ dns__host }}" and TTL 1 hour:
+          {% for ns in dns__expected %}
+                 {{ ns }}
+          {% endfor %}
+          Then re-run `make dns`; the change usually shows up within minutes.
+        success_msg: "{{ domain_name }} is served by Azure DNS ({{ dns__actual | join(', ') }})."
+      vars:
+        dns__actual: >-
+          {{ dns__lookup.json.Answer | default([]) | selectattr('type', 'equalto', 2) | map(attribute='data')
+          | map('lower') | map('regex_replace', '\.$', '') | sort }}
+...

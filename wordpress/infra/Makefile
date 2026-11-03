@@ -28,7 +28,7 @@ SSH = ssh -i $(TF_DIR)/$(ENV).pem -o StrictHostKeyChecking=accept-new -o UserKno
 DOMAIN = $(shell sed -n 's/^domain_name: //p' env/$(ENV).yml)
 
 .PHONY: help install check infra-plan infra-deploy app-deploy deploy https login \
-	email-dns email-verify mail-test status logs ssh restart app-destroy infra-destroy
+	dns email-verify mail-test status logs ssh restart app-destroy infra-destroy
 
 help:
 	@awk 'BEGIN {FS = ":.*## "} /^[a-z-]+:.*## / {printf "  make %-14s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -62,10 +62,10 @@ https: install ## After DNS points at the VM: get the certificate and verify HTT
 login: install ## Verify the wp-admin login and print it (RESET_PASSWORD=1 resets it)
 	$(PLAYBOOK) playbooks/admin_login.yml -e "login__reset_password=$(if $(RESET_PASSWORD),true,false)"
 
-email-dns: ## DNS records to add for the mail sending domain
-	@$(TF) output $(TF_STATE) email_dns_records
+dns: install ## Check the subdomain is delegated to Azure DNS (prints the GoDaddy NS records if not)
+	$(PLAYBOOK) playbooks/dns_check.yml -e '{"dns__name_servers": '"$$($(TF) output $(TF_STATE) -json name_servers)"'}'
 
-email-verify: install ## After adding those records: have Azure verify the domain
+email-verify: install ## Once `make dns` passes: have Azure verify the mail sending domain
 	$(PLAYBOOK) playbooks/email_verify.yml -e "email_domain_id=$$($(TF_OUT) email_domain_id)"
 
 mail-test: install ## Send a test email (TO=address; default: your Azure login)

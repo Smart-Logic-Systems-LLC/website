@@ -13,7 +13,10 @@ vm_size = "Standard_B2pts_v2"
 vm_image_offer   = "ubuntu-26_04-lts"
 vm_image_version = "26.04.202610280"
 
+# Delegated from GoDaddy (dns.tf); `make dns` lists the NS records to add there.
+dns_zone = "dev.smartlogicsystems.com"
+
 # Outbound mail (email.tf). Flip email_domain_verified once `make email-verify` passes.
 email_domain              = "dev.smartlogicsystems.com"
 email_sender_display_name = "Smart Logic Systems (dev)"
-email_domain_verified     = false
+email_domain_verified     = true

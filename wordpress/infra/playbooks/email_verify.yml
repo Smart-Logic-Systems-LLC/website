@@ -1,6 +1,7 @@
 ---
-# Run after adding the `make email-dns` records at the DNS provider: asks Azure
-# to verify the sending domain (ownership, SPF, DKIM, DKIM2) and waits for the result.
+# Run once the DNS zone is delegated (`make dns`), which publishes the records
+# from dns.tf: asks Azure to verify the sending domain (ownership, SPF, DKIM, DKIM2)
+# and waits for the result.
 - name: Verify the mail sending domain
   hosts: localhost
   connection: local
@@ -47,8 +48,8 @@
       ansible.builtin.assert:
         that: email__failed | length == 0
         fail_msg: >-
-          Not verified: {{ email__failed | join(', ') }}. Check these records at the DNS provider
-          (`make email-dns`), wait for DNS to update, then re-run `make email-verify`.
+          Not verified: {{ email__failed | join(', ') }}. Check the DNS delegation (`make dns`),
+          wait for DNS to update, then re-run `make email-verify`.
         success_msg: >-
           {{ (email__after.stdout | from_json).name }} is verified. Set email_domain_verified = true
           in deployment/vm/azure/<env>.tfvars (if not already) and run `make deploy`.

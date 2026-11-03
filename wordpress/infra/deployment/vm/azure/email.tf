@@ -4,8 +4,8 @@
 # VMs, so the VM cannot deliver mail itself.
 #
 # The sending domain must be verified before it can be linked:
-#   1. apply, then add the records from the `email_dns_records` output at the DNS provider
-#   2. `make email-verify`
+#   1. apply (dns.tf publishes Azure's verification records in the DNS zone)
+#   2. once the zone is delegated (`make dns`), `make email-verify`
 #   3. set email_domain_verified = true in <env>.tfvars and run `make deploy`
 
 resource "azurerm_email_communication_service" "main" {
@@ -112,19 +112,6 @@ resource "local_sensitive_file" "smtp" {
     smtp_relay_password = azuread_application_password.smtp.value
     smtp_sender         = "${var.email_sender_username}@${var.email_domain}"
   })
-}
-
-output "email_dns_records" {
-  description = "Records to create at the DNS provider for the sending domain"
-  value = [
-    for kind in ["domain", "spf", "dkim", "dkim2"] : {
-      purpose = kind
-      type    = azurerm_email_communication_service_domain.main.verification_records[0][kind][0].type
-      name    = azurerm_email_communication_service_domain.main.verification_records[0][kind][0].name
-      value   = azurerm_email_communication_service_domain.main.verification_records[0][kind][0].value
-      ttl     = azurerm_email_communication_service_domain.main.verification_records[0][kind][0].ttl
-    }
-  ]
 }
 
 output "email_domain_id" {

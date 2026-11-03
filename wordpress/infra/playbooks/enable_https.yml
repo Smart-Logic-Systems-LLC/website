@@ -23,7 +23,7 @@
         that: ansible_host in https__dns_ips
         fail_msg: >-
           {{ domain_name }} resolves to {{ https__dns_ips | join(', ') or 'nothing' }} in public DNS, not {{ ansible_host }}.
-          Add an A record "{{ domain_name.split('.')[0] }}" -> {{ ansible_host }} at the DNS provider and retry once it resolves.
+          Check the DNS delegation (`make dns`) and the A record in the Azure DNS zone, then retry once it resolves.
         success_msg: "{{ domain_name }} -> {{ ansible_host }}"
       vars:
         https__dns_ips: "{{ https__dns.json.Answer | default([]) | selectattr('type', 'equalto', 1) | map(attribute='data') | list }}"

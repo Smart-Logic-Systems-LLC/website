@@ -45,6 +45,11 @@ variable "ssh_allowed_cidrs" {
   description = "Source addresses allowed to reach SSH (the Makefile passes the deployer's public IP)"
 }
 
+variable "dns_zone" {
+  type        = string
+  description = "Subdomain delegated to Azure DNS (dns.tf); the site is served at its apex"
+}
+
 variable "email_domain" {
   type        = string
   description = "Domain WordPress sends mail from through Azure Communication Services"

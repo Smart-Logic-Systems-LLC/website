@@ -39,13 +39,25 @@ make check           # tofu fmt/validate + ansible-lint
 
 **First deploy of an environment.**
 
-1. Run `make deploy`. It prints the VM's public IP.
-2. At the DNS provider, add an A record for the domain in `env/<env>.yml` that
-   points at that IP (for dev on GoDaddy: Name `dev`, Value the IP, TTL 600).
+1. Run `make deploy`. Besides the VM, it creates an Azure DNS zone for the
+   site's subdomain (`dns_zone` in `<env>.tfvars`) holding its A and mail records.
+2. Run `make dns`. Until the subdomain is delegated it lists what to change at
+   GoDaddy: remove the subdomain's A record and add one NS record per Azure
+   nameserver. Re-run it until it passes. The root domain stays at GoDaddy.
 3. Run `make https`. It checks public DNS first, then has Caddy request the
    certificate and waits until the site serves it, so it is safe to re-run.
 4. Run `make login`. If someone changed the password in wp-admin, run
    `make login RESET_PASSWORD=1` to set it back to the stored one.
+
+**Mail.** WordPress sends through a Postfix relay container in the pod, which
+hands mail to Azure Communication Services Email (Azure blocks outbound port 25
+from VMs). The sender is `wordpress@<dns_zone>`; the zone holds its SPF and DKIM
+records. After `make dns` passes:
+
+1. Run `make email-verify` to have Azure verify the sending domain.
+2. Set `email_domain_verified = true` in `deployment/vm/azure/<env>.tfvars` and
+   run `make deploy`. This adds the relay container.
+3. Run `make mail-test` (`TO=<address>`; default your Azure login).
 
 **Content.** The first deploy installs WordPress and creates the pages from the
 theme's patterns. Later deploys keep page content edited in wp-admin;
@@ -65,7 +77,9 @@ Internet ─▶ NSG (80, 443; 22 from the deployer's IP) ─▶ VM Standard_B2pt
       caddy      :80/:443  automatic Let's Encrypt certificate, reverse proxy
       wordpress  :8080     wordpress:7.1.2-php8.3-apache, theme mounted read-only
       db         :3306     mariadb:11.8
-    volumes: slswebsite-{wp-data,db-data,caddy-data,caddy-config}
+      relay      :587      Postfix → Azure Communication Services Email (once mail is set up)
+    volumes: slswebsite-{wp-data,db-data,caddy-data,caddy-config,mail-spool}
+DNS: GoDaddy (root domain) ─NS─▶ Azure DNS zone for the subdomain (A, SPF, DKIM)
 ```
 
 ## Differences from the Drupal deployment
@@ -93,5 +107,5 @@ Internet ─▶ NSG (80, 443; 22 from the deployer's IP) ─▶ VM Standard_B2pt
 | `deployment/vm/azure/dev.tfstate` | OpenTofu state, **including the VM's SSH private key**. Losing it means managing the resources by hand. |
 | `deployment/vm/azure/dev.pem` | SSH key for `slsadmin@<ip>` |
 | `deployment/vm/azure/dev.inventory.ini` | Ansible inventory (written by OpenTofu) |
-| `secrets/dev/` | Database and wp-admin passwords |
+| `secrets/dev/` | Database and wp-admin passwords; `smtp.yml`, the relay's Azure SMTP credentials |
 | `.known_hosts` | The VM's SSH host key |
